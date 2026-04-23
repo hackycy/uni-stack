@@ -5,6 +5,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 import {
+  atomicWriteFile,
   compareStringWithFile,
   findConfigFile,
   jsoncAssign,
@@ -552,7 +553,7 @@ export class Context {
         return
       }
 
-      await fs.promises.writeFile(
+      await atomicWriteFile(
         this.options.outputJsonPath,
         jsonStr,
         { encoding: 'utf-8' },

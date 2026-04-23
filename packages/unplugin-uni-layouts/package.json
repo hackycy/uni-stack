@@ -1,7 +1,7 @@
 {
   "name": "@uni-aide/unplugin-uni-layouts",
   "type": "module",
-  "version": "0.7.8",
+  "version": "0.7.11",
   "private": true,
   "description": "@uni-aide/unplugin-uni-layouts",
   "author": "hackycy",

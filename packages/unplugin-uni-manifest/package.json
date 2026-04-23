@@ -1,7 +1,7 @@
 {
   "name": "@uni-aide/unplugin-uni-manifest",
   "type": "module",
-  "version": "0.7.8",
+  "version": "0.7.11",
   "description": "@uni-aide/unplugin-uni-manifest",
   "author": "hackycy",
   "license": "MIT",

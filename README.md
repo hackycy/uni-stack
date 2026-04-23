@@ -1,6 +1,6 @@
 # uni-aide
 
-旨在增强 uni-app 开发体验助手
+助力 uni-app 开发，全方位增强开发效率与使用体验
 
 ## Packages
 
