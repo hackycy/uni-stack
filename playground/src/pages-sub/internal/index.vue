@@ -10,7 +10,7 @@ onShow(() => {
 });
 </script>
 
-<route lang="jsonc" part="subPackage">
+<route lang="jsonc">
 {
   "style": {
     "navigationBarTitleText": "Pages Sub Internal",

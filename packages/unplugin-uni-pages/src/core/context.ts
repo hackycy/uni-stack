@@ -558,23 +558,37 @@ export class Context {
           }
         })
 
-      // 检测主包与分包页面路径冲突
+      // detect page path conflicts between main package and subPackages
       const mainPagePaths = new Set<string>()
       pageMeta.pages?.forEach(p => mainPagePaths.add(p.path))
-      const conflicts: Array<{ path: string, root: string }> = []
+
+      const subPageRoots = new Map<string, string>() // fullPath -> root
+      const subPackageRoots = new Set<string>()
       pageMeta.subPackages?.forEach((sub) => {
+        subPackageRoots.add(sub.root)
         sub.pages?.forEach((p) => {
-          const fullPath = `${sub.root}/${p.path}`
-          if (mainPagePaths.has(fullPath)) {
-            conflicts.push({ path: fullPath, root: sub.root })
-          }
+          subPageRoots.set(`${sub.root}/${p.path}`, sub.root)
         })
       })
-      if (conflicts.length > 0) {
-        console.warn(
-          `[unplugin-uni-pages] 检测到 ${conflicts.length} 个页面路径同时存在于主包和分包：`,
-        )
-        conflicts.forEach(c => console.warn(`  - "${c.path}" (分包根: ${c.root})`))
+
+      const conflicts = new Set<string>()
+      for (const pagePath of mainPagePaths) {
+        const subRoot = subPageRoots.get(pagePath)
+        if (subRoot) {
+          conflicts.add(`"${pagePath}" conflicts with subPackage "${subRoot}"`)
+        }
+        else {
+          for (const root of subPackageRoots) {
+            if (pagePath.startsWith(`${root}/`)) {
+              conflicts.add(`"${pagePath}" conflicts with subPackage root "${root}/"`)
+              break
+            }
+          }
+        }
+      }
+
+      if (conflicts.size > 0) {
+        conflicts.forEach(c => console.warn(`[unplugin-uni-pages] page path conflict detected: ${c}`))
       }
 
       const jsonStr = jsoncStringify(pageMeta, null, 2)
