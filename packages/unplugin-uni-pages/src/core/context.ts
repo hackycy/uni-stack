@@ -558,6 +558,25 @@ export class Context {
           }
         })
 
+      // 检测主包与分包页面路径冲突
+      const mainPagePaths = new Set<string>()
+      pageMeta.pages?.forEach(p => mainPagePaths.add(p.path))
+      const conflicts: Array<{ path: string, root: string }> = []
+      pageMeta.subPackages?.forEach((sub) => {
+        sub.pages?.forEach((p) => {
+          const fullPath = `${sub.root}/${p.path}`
+          if (mainPagePaths.has(fullPath)) {
+            conflicts.push({ path: fullPath, root: sub.root })
+          }
+        })
+      })
+      if (conflicts.length > 0) {
+        console.warn(
+          `[unplugin-uni-pages] 检测到 ${conflicts.length} 个页面路径同时存在于主包和分包：`,
+        )
+        conflicts.forEach(c => console.warn(`  - "${c.path}" (分包根: ${c.root})`))
+      }
+
       const jsonStr = jsoncStringify(pageMeta, null, 2)
       const isSame = await compareStringWithFile(jsonStr, this.options.outputJsonPath)
       if (isSame) {
