@@ -6,12 +6,12 @@
   "description": "@uni-aide/unplugin-uni-layouts",
   "author": "hackycy",
   "license": "MIT",
-  "homepage": "https://github.com/hackycy/uni-aide#readme",
+  "homepage": "https://github.com/hackycy/uni-stack#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hackycy/uni-aide.git"
+    "url": "git+https://github.com/hackycy/uni-stack.git"
   },
-  "bugs": "https://github.com/hackycy/uni-aide/issues",
+  "bugs": "https://github.com/hackycy/uni-stack/issues",
   "keywords": [
     "uniapp"
   ],
