@@ -322,6 +322,16 @@ export class Context {
         //   'pages/subpackage': ['comment', 'goods', 'list/list']
         // }
         const sortedPaths = Array.from(allSubPackagesPath).sort()
+        const definedRoots = Array.from(defineSubPackageRoots)
+
+        // 预计算：哪些一级目录下存在直接文件（用于 O(1) 判断目录是否为有效分包根）
+        const dirHasDirectFile = new Set<string>()
+        for (const p of allSubPackagesPath) {
+          const parts = p.split('/')
+          if (parts.length === 2) {
+            dirHasDirectFile.add(parts[0])
+          }
+        }
 
         // LCP函数：返回两个字符串的最长共同目录前缀（以'/'结尾）
         function lcpPath(str1: string, str2: string) {
@@ -344,30 +354,31 @@ export class Context {
         const dirPrefix = (p: string) =>
           p.includes('/') ? p.substring(0, p.lastIndexOf('/') + 1) : ''
 
-        const shouldSplitByLCP = (nextLCP: string, currentLCP: string) => {
+        const shouldSplitByLCP = (nextLCP: string, currentLCP: string, fullPath: string) => {
           // nextLCP 为空：说明没有共同目录，需要拆组
           if (!nextLCP) {
             return true
           }
 
-          // currentLCP 被更短的已定义分包根包含, 继续归为一组
-          if (Array.from(defineSubPackageRoots).some(root => currentLCP.startsWith(`${root}/`) && currentLCP !== root)) {
-            return false
+          // 如果当前组在一个已定义的分包根下，检查新路径是否还在同一根下
+          // 若不在 → 拆组，若在 → 继续归为一组
+          const containingRoot = definedRoots.find(
+            root => currentLCP.startsWith(`${root}/`),
+          )
+          if (containingRoot) {
+            return !fullPath.startsWith(`${containingRoot}/`)
           }
 
           // 如果 LCP 变成了只有一级的目录（如 'pages/'）
-          // 只要这个一级目录下未存在文件，那么则视为非最短的分包根，继续归为一组
+          // 只要这个一级目录下未存在直接文件，那么则视为非最短的分包根，继续归为一组
           // 即 pages/ 下还有其他文件，则说明 pages/ 是一个有效的分包根，需拆组
           // 如果 pages/ 下没有其他文件，则说明 pages/ 不是一个有效的分包根，继续归为一组
           // 例如 pages/a 和 pages/b/a 的 LCP 是 pages/ （a为文件）
           const isTopLevel = nextLCP.split('/').length === 2
           if (isTopLevel) {
             const potentialRoot = nextLCP.slice(0, -1) // 去掉末尾斜杠
-            const hasFiles = Array.from(allSubPackagesPath).some(
-              p => p !== potentialRoot && p.startsWith(`${potentialRoot}/`) && p.split('/').length <= 2,
-            )
-            // 当前目录下没有文件，则不该使用该目录作为分包根
-            if (!hasFiles) {
+            // 当前目录下没有直接文件，则不该使用该目录作为分包根
+            if (!dirHasDirectFile.has(potentialRoot)) {
               return true
             }
           }
@@ -404,7 +415,7 @@ export class Context {
           const fullPath = sortedPaths[i]
           const nextLCP = lcpPath(currentLCP, fullPath)
 
-          if (shouldSplitByLCP(nextLCP, currentLCP)) {
+          if (shouldSplitByLCP(nextLCP, currentLCP, fullPath)) {
             finalizeGroup(currentGroup, currentLCP)
             currentGroup = [fullPath]
             currentLCP = dirPrefix(fullPath)

@@ -56,8 +56,7 @@ module.exports = defineConfig({
       ],
     },
     // 测试用例：嵌套已定义分包根 + 扫描到的新页面
-    // 预期：admin/settings 应归入已有的 pages/admin 根
-    // 实际（Bug）：会被归入新建的 pages 根
+    // 验证：admin/settings 应归入已有的 pages/admin 根
     {
       root: 'pages/admin',
       pages: [
@@ -69,7 +68,7 @@ module.exports = defineConfig({
         },
       ],
     },
-    // 测试用例：同上，验证 shop/products 是否归入已有的 pages/shop 根
+    // 测试用例：验证 shop/products 归入已有的 pages/shop 根
     {
       root: 'pages/shop',
       pages: [
